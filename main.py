@@ -4,6 +4,7 @@ import requests
 
 app = Flask(__name__)
 
+# Environment Variables (to be set on Render or locally)
 FYERS_ACCESS_TOKEN = os.getenv("FYERS_ACCESS_TOKEN")
 FYERS_API_URL = "https://api.fyers.in/api/v2/orders"
 
@@ -46,3 +47,9 @@ def webhook():
         "symbol": symbol,
         "fyers_response": response.json()
     })
+
+# Required for Gunicorn
+application = app
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
