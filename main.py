@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
-import requests
 import os
+import requests
 
 app = Flask(__name__)
 
-FYERS_ACCESS_TOKEN = os.getenv("FYERS_ACCESS_TOKEN")  # Stored in Render environment
+FYERS_ACCESS_TOKEN = os.getenv("FYERS_ACCESS_TOKEN")
 FYERS_API_URL = "https://api.fyers.in/api/v2/orders"
 
-@app.route('/', methods=['GET'])
+@app.route('/')
 def home():
     return jsonify({"message": "Nooré Webhook Server is Online 🌸"})
 
@@ -16,8 +16,7 @@ def webhook():
     data = request.json
     print("✅ Received Webhook:", data)
 
-    direction = "CE" if "CE" in data["signal"] else "PE"
-    side = 1  # 1 = BUY
+    direction = "CE" if data["signal"] == "CE" else "PE"
     strike = int(data["strike"])
     symbol = f"NSE:BANKNIFTY{strike}{direction}"
 
@@ -25,7 +24,7 @@ def webhook():
         "symbol": symbol,
         "qty": 1,
         "type": 2,
-        "side": side,
+        "side": 1,
         "productType": "INTRADAY",
         "limitPrice": 0,
         "stopPrice": 0,
