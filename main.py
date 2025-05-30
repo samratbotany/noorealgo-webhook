@@ -1,25 +1,24 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, Request
 import os
 import requests
 
-app = Flask(__name__)
+app = FastAPI()
 
-# Environment Variables (Set in Render)
 FYERS_ACCESS_TOKEN = os.getenv("FYERS_ACCESS_TOKEN")
 FYERS_API_URL = "https://api.fyers.in/api/v2/orders"
 
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Nooré Webhook Server is Online 🌸"})
+@app.get("/")
+async def root():
+    return {"message": "Nooré Webhook Server is Alive 🌸"}
 
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    data = request.json
-    print("✅ Received Webhook:", data)
+@app.post("/webhook")
+async def webhook(req: Request):
+    data = await req.json()
+    print("✅ Webhook received:", data)
 
-    direction = "CE" if data["signal"] == "CE" else "PE"
-    side = 1  # BUY
-    strike = int(data["strike"])
+    direction = "CE" if data.get("signal") == "CE" else "PE"
+    side = 1  # Buy
+    strike = int(data.get("strike", 0))
     symbol = f"NSE:BANKNIFTY{strike}{direction}"
 
     payload = {
@@ -40,16 +39,10 @@ def webhook():
     }
 
     response = requests.post(FYERS_API_URL, json=payload, headers=headers)
-    print("📤 Order Sent. Response:", response.json())
+    print("📤 Order sent. Response:", response.json())
 
-    return jsonify({
+    return {
         "status": "Executed",
         "symbol": symbol,
         "fyers_response": response.json()
-    })
-
-# For Uvicorn to find this app
-application = app
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    }
