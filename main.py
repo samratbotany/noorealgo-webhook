@@ -4,7 +4,7 @@ import requests
 
 app = Flask(__name__)
 
-# Environment Variables (to be set on Render)
+# Environment Variables (Set in Render)
 FYERS_ACCESS_TOKEN = os.getenv("FYERS_ACCESS_TOKEN")
 FYERS_API_URL = "https://api.fyers.in/api/v2/orders"
 
@@ -40,7 +40,7 @@ def webhook():
     }
 
     response = requests.post(FYERS_API_URL, json=payload, headers=headers)
-    print("📦 Order Sent. Response:", response.json())
+    print("📤 Order Sent. Response:", response.json())
 
     return jsonify({
         "status": "Executed",
@@ -48,7 +48,7 @@ def webhook():
         "fyers_response": response.json()
     })
 
-# Required for Gunicorn to find the app
+# For Uvicorn to find this app
 application = app
 
 if __name__ == "__main__":
