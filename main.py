@@ -7,16 +7,17 @@ app = Flask(__name__)
 FYERS_ACCESS_TOKEN = os.getenv("FYERS_ACCESS_TOKEN")
 FYERS_API_URL = "https://api.fyers.in/api/v2/orders"
 
-@app.route('/')
+@app.route("/", methods=["GET"])
 def home():
     return jsonify({"message": "Nooré Webhook Server is Online 🌸"})
 
-@app.route('/webhook', methods=['POST'])
+@app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
     print("✅ Received Webhook:", data)
 
     direction = "CE" if data["signal"] == "CE" else "PE"
+    side = 1  # BUY
     strike = int(data["strike"])
     symbol = f"NSE:BANKNIFTY{strike}{direction}"
 
@@ -24,7 +25,7 @@ def webhook():
         "symbol": symbol,
         "qty": 1,
         "type": 2,
-        "side": 1,
+        "side": side,
         "productType": "INTRADAY",
         "limitPrice": 0,
         "stopPrice": 0,
@@ -38,7 +39,7 @@ def webhook():
     }
 
     response = requests.post(FYERS_API_URL, json=payload, headers=headers)
-    print("📤 Order Sent. Response:", response.json())
+    print("📦 Order Sent. Response:", response.json())
 
     return jsonify({
         "status": "Executed",
